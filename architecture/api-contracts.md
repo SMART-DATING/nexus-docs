@@ -1,296 +1,51 @@
-# API-контракты Nexus (MVP)
+# REST API прототипа
 
-Базовый префикс:
+Префикс `/api/v1`, JSON UTF-8. Для всех методов, кроме health/register/login, заголовок `Authorization: Bearer <accessToken>` обязателен. Ошибки: `{ "status": 400, "message": "..." }`; обработчик валидации также добавляет timestamp. Клиент должен опираться на status/message.
 
-```text
-/api/v1
-```
+## Авторизация
+- `GET /health` → `{ "status": "ok" }`.
+- `POST /auth/register` → 201; `POST /auth/login` → 200. Тело: `{ "email":"a@example.com", "password":"Password123!" }`.
+- Ответ обоих: `{ "accessToken":"...", "tokenType":"Bearer", "expiresAt":"ISO-8601", "user": { "id":1, "email":"a@example.com", "profile":{...}, "preferences":{"minAge":18,"maxAge":60} } }`.
+- Токен непрозрачный (не JWT), живёт 24 часа.
+- `POST /auth/logout` → 204; токен отзывается.
+- `GET /users/me` → объект user.
 
-Формат данных: JSON.
-
-Для защищённых endpoint:
-
-```http
-Authorization: Bearer <token>
-```
-
-## 1. Единый формат ошибки
-
+## Профиль, интересы, предпочтения
+- `GET /profiles/me` → профиль со всеми собственными свойствами.
+- `GET /profiles/{userId}` → публичный профиль; для собственного ID включает скрытые поля.
+- `PUT /profiles/me` → сохранённый профиль; тело полностью заменяет четыре свойства и набор интересов:
 ```json
 {
-  "timestamp": "2026-09-28T12:00:00Z",
-  "status": 400,
-  "code": "VALIDATION_ERROR",
-  "message": "Request validation failed",
-  "details": {
-    "email": "Invalid email format"
-  }
+  "properties": [
+    {"name":"display_name","value":"Алекс","visible":true},
+    {"name":"bio","value":"Люблю музыку","visible":true},
+    {"name":"birth_date","value":"2001-04-12","visible":false},
+    {"name":"city","value":"Москва","visible":true}
+  ],
+  "interests":["Музыка","Кофе"]
 }
 ```
+- Профиль ответа: `{ "userId":1, "properties":[...], "interests":[...] }`. Чужие скрытые поля отсутствуют полностью.
+- `GET /interests` → `{ "items": ["Музыка", "Кино", ...] }`. Числовых interestIds в этом прототипе нет. Отдельный PUT interests заменён атомарным сохранением профиля.
+- `GET /preferences/me`, `PUT /preferences/me` → `{ "minAge":18, "maxAge":60 }`; PUT принимает ту же структуру.
 
----
+## Подбор и реакции
+- `GET /recommendations?limit=20` → `{ "items":[{...profile, "commonInterests":["Кофе"], "compatibilityScore":0.5}] }`.
+- limit ограничивается диапазоном 1–50. Сортировка score ↓, userId ↑. Неполный профиль — 409, пустая выдача — 200.
+- `POST /users/{userId}/like`, `POST /users/{userId}/skip` → `{ "liked":true, "skipped":false, "matched":true, "matchId":15 }`. При отсутствии match `matchId:null`.
+- Повторная реакция — 409, self — 400, неизвестный user — 404. Тела запросов не нужны.
 
-## 2. Auth
+## Match и чат
+- `GET /matches` → `{ "items":[{ "id":15, "user":{...publicProfile}, "createdAt":"ISO-8601" }] }`.
+- `GET /matches/{matchId}` → один элемент. Дополнительный alias `GET /match/{matchId}` поддерживает обозначение преподавателя.
+- Маршрут страницы frontend: `/match/{matchId}`.
+- `GET /matches/{matchId}/messages?after=0` → `{ "items":[{ "id":1, "matchId":15, "senderId":1, "text":"Привет", "createdAt":"ISO-8601" }] }`.
+- Возвращаются первые 100 сообщений с id > after, в порядке ID. Для следующей порции передайте последний ID. Для опроса новых — тот же курсор.
+- `POST /matches/{matchId}/messages`, тело `{ "text":"Привет" }` → 201, объект сообщения. От 1 непустого до 5000 символов; внешние пробелы удаляются.
+- Только участникам: 403 для постороннего, 404 при отсутствии match.
 
-### POST /auth/register
+## Уведомления
+- `GET /notifications` → `{ "items":[{ "id":1, "userId":1, "matchId":15, "text":"...", "seen":false, "createdAt":"ISO-8601" }] }`, последние 100 по ID ↓.
+- `PATCH /notifications/{id}/read` → объект с `seen:true`, идемпотентно; чужой ID — 403.
 
-Request:
-```json
-{
-  "email": "user@example.com",
-  "password": "StrongPassword123"
-}
-```
-
-Responses:
-- `201 Created`
-- `400 Bad Request`
-- `409 Conflict` — email уже занят.
-
-### POST /auth/login
-
-Request:
-```json
-{
-  "email": "user@example.com",
-  "password": "StrongPassword123"
-}
-```
-
-Response `200 OK`:
-```json
-{
-  "accessToken": "<token>",
-  "tokenType": "Bearer"
-}
-```
-
-Responses:
-- `200 OK`
-- `401 Unauthorized`
-
-### GET /users/me
-Возвращает данные текущего пользователя.
-
----
-
-## 3. Profile
-
-### GET /profiles/me
-Получить собственный профиль.
-
-### PUT /profiles/me
-
-Request:
-```json
-{
-  "displayName": "Alex",
-  "bio": "Люблю backend, музыку и путешествия"
-}
-```
-
-### GET /profiles/{userId}
-Получить публичную часть профиля доступного пользователя.
-
----
-
-## 4. Interest
-
-### GET /interests
-Получить справочник интересов.
-
-### PUT /profiles/me/interests
-
-Request:
-```json
-{
-  "interestIds": [1, 4, 7]
-}
-```
-
-Результат: актуальный набор интересов пользователя.
-
----
-
-## 5. Preference
-
-### GET /preferences/me
-Получить предпочтения.
-
-### PUT /preferences/me
-
-Пример:
-```json
-{
-  "minAge": 18,
-  "maxAge": 30
-}
-```
-
-Набор полей может уточняться после согласования предметной области.
-
----
-
-## 6. Recommendation
-
-### GET /recommendations?limit=20
-
-Response:
-```json
-{
-  "items": [
-    {
-      "userId": 42,
-      "displayName": "Sam",
-      "bio": "Java, кино, бег",
-      "commonInterests": [
-        {"id": 1, "name": "Java"},
-        {"id": 5, "name": "Running"}
-      ],
-      "compatibilityScore": 0.82
-    }
-  ]
-}
-```
-
-Важные правила:
-- текущий пользователь исключается;
-- обработанные рекомендации учитываются;
-- недоступные профили не возвращаются.
-
----
-
-## 7. Like / Skip
-
-### POST /users/{userId}/like
-
-Response:
-```json
-{
-  "liked": true,
-  "matched": true,
-  "matchId": 15
-}
-```
-
-Если взаимного Like нет:
-```json
-{
-  "liked": true,
-  "matched": false,
-  "matchId": null
-}
-```
-
-### POST /users/{userId}/skip
-
-Response:
-```json
-{
-  "skipped": true
-}
-```
-
-Ошибки:
-- `400` — попытка реакции на самого себя;
-- `404` — пользователь не найден;
-- `409` — реакция уже обработана.
-
----
-
-## 8. Match
-
-### GET /matches
-
-Response:
-```json
-{
-  "items": [
-    {
-      "id": 15,
-      "user": {
-        "id": 42,
-        "displayName": "Sam"
-      },
-      "createdAt": "2026-09-28T09:00:00Z"
-    }
-  ]
-}
-```
-
-### GET /matches/{matchId}
-Возвращает Match только его участнику.
-
----
-
-## 9. Message
-
-### GET /matches/{matchId}/messages
-
-Response:
-```json
-{
-  "items": [
-    {
-      "id": 101,
-      "senderId": 7,
-      "text": "Привет!",
-      "createdAt": "2026-09-28T09:10:00Z",
-      "read": false
-    }
-  ]
-}
-```
-
-### POST /matches/{matchId}/messages
-
-Request:
-```json
-{
-  "text": "Привет!"
-}
-```
-
-Responses:
-- `201 Created`
-- `400 Bad Request` — пустой/слишком длинный текст;
-- `403 Forbidden` — пользователь не участник Match;
-- `404 Not Found` — Match отсутствует.
-
----
-
-## 10. Notification
-
-### GET /notifications
-
-### PATCH /notifications/{notificationId}/read
-
-Response:
-```json
-{
-  "id": 55,
-  "read": true
-}
-```
-
----
-
-## 11. HTTP-статусы
-
-| Статус | Значение |
-|---|---|
-| 200 | Успешное чтение/изменение |
-| 201 | Ресурс создан |
-| 204 | Успешно, тела ответа нет |
-| 400 | Ошибка входных данных |
-| 401 | Не авторизован |
-| 403 | Нет прав |
-| 404 | Ресурс не найден |
-| 409 | Конфликт состояния/дубликат |
-| 500 | Необработанная серверная ошибка |
-
-## 12. Что вынести в Swagger
-
-После появления backend endpoints этот документ следует синхронизировать с
-OpenAPI/Swagger. Источником истины по техническому контракту в коде должен стать
-OpenAPI, а этот Markdown — понятным описанием решений для защиты.
+Статусы: 200/201/204 — успех; 400 — данные; 401 — сессия/вход; 403 — чужой ресурс; 404 — отсутствие; 409 — дубликат/незавершённый профиль. Необработанные ошибки могут вернуть стандартный ответ Spring, детали исключений не раскрываются.

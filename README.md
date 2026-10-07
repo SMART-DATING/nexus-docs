@@ -1,58 +1,22 @@
-# Nexus — Документация к лабораторной работе №2
+# Nexus / SMART-DATING — рабочий прототип
 
-**Nexus** — клиент-серверное веб-приложение для подбора пользователей на основе интересов, предпочтений и истории взаимодействий.
+Nexus помогает находить людей с общими интересами и начинать общение при взаимной симпатии.
 
-Этот каталог содержит проектную документацию, необходимую для второго чекпоинта: анализ бизнес-требований, функциональные и нефункциональные требования, варианты использования, архитектуру, API-контракты, ERD, роли, workflow и roadmap.
+Репозитории: [backend](https://github.com/SMART-DATING/nexus-backend), [frontend](https://github.com/SMART-DATING/nexus-frontend), [docs](https://github.com/SMART-DATING/nexus-docs).
 
----
+## Начать здесь
+- [Соответствие условиям лабораторной](LAB_REQUIREMENTS.md)
+- [Запуск и демонстрация](RUNBOOK.md)
+- [Бизнес-цели](requirements/business-requirements.md)
+- [Функциональные требования](requirements/functional-requirements.md)
+- [Ограничения и нефункциональные требования](requirements/non-functional-requirements.md)
+- [Пользовательские сценарии](requirements/use-cases.md)
+- [Архитектура](architecture/system-architecture.md), [API](architecture/api-contracts.md), [ERD](diagrams/ERD.md), [UML](diagrams/UML.md)
+- [Изменения относительно лабораторной](changelog.md), [план развития](roadmap.md), [проверки](TESTING.md)
 
-## 📂 Структура каталога
+Текущая версия — локальный учебный прототип. Реализованы регистрация/вход/выход, свойства профиля и приватность, интересы, возрастные предпочтения, подбор, like/skip, взаимный match, чат и уведомления.
 
-```text
-nexus-docs/
-├── 📄 README.md                      # Главная страница документации
-├── 📋 LAB2_CHECKLIST.md              # Чеклист критериев лабораторной работы №2
-│
-├── 🎯 requirements/                  # Требования к системе
-│   ├── business-requirements.md      # Анализ бизнес-требований и целей
-│   ├── functional-requirements.md    # Функциональные требования
-│   ├── non-functional-requirements.md# Нефункциональные требования (SLA, нагрузка, безопасность)
-│   └── use-cases.md                  # Варианты использования (Use Cases)
-│
-├── 🏗️ architecture/                  # Архитектура и спецификации
-│   ├── system-architecture.md        # Описание системной архитектуры и компонентов
-│   └── api-contracts.md              # Спецификация REST API / контракты
-│
-├── 📊 diagrams/                      # Диаграммы и схемы
-│   └── ERD.md                        # ER-диаграмма базы данных (Entity-Relationship)
-│
-├── 👥 team/                          # Организация работы команды
-│   ├── roles.md                      # Распределение ролей и зон ответственности
-│   └── workflow.md                   # Регламент разработки, GitFlow и Code Review
-│
-└── 🗺️ roadmap.md                     # Дорожная карта и этапы реализации
-```
+Исходные требования сохранены в `archive/lab2-original/`. Старые PNG-диаграммы остаются историческими материалами; актуальна ERD.md. Состав команды в `team/` не менялся.
 
----
+Изменения для проверки: [Backend PR #12](https://github.com/SMART-DATING/nexus-backend/pull/12), [Frontend PR #5](https://github.com/SMART-DATING/nexus-frontend/pull/5).
 
-## 🛠 Технологический стек
-
-### Frontend
-- **Framework / Library:** React
-- **Language:** TypeScript
-- **Build Tool:** Vite
-
-### Backend
-- **Language:** Java
-- **Framework:** Spring Boot
-- **ORM / Data Access:** Spring Data JPA / Hibernate
-- **Security:** Spring Security
-
-### Database
-- PostgreSQL
-
----
-
-## 📌 Статус проекта
-
-Документация описывает **целевое состояние** проекта на момент сдачи лабораторной работы №2. Фактически реализованные функции и текущий прогресс отслеживаются в **Issues / Project Board** и в `README` соответствующих репозиториев (Backend / Frontend).
