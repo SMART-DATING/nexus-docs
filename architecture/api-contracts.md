@@ -1,6 +1,6 @@
 # REST API прототипа
 
-Префикс `/api/v1`, JSON UTF-8. Для всех методов, кроме health/register/login, заголовок `Authorization: Bearer <accessToken>` обязателен. Ошибки: `{ "status": 400, "message": "..." }`; обработчик валидации также добавляет timestamp. Клиент должен опираться на status/message.
+Префикс `/api/v1`, JSON UTF-8. Для всех методов, кроме health/register/login и публичного GET /avatars/{userId}, заголовок `Authorization: Bearer <accessToken>` обязателен. Ошибки: `{ "status": 400, "message": "..." }`; обработчик валидации также добавляет timestamp. Клиент должен опираться на status/message.
 
 ## Авторизация
 - `GET /health` → `{ "status": "ok" }`.
@@ -25,12 +25,16 @@
   "interests":["Музыка","Кофе"]
 }
 ```
-- Профиль ответа: `{ "userId":1, "properties":[...], "interests":[...] }`. Чужие скрытые поля отсутствуют полностью. Необязательное поле avatarUrl содержит локальный путь, например /avatars/demo-01.svg; загрузка пользовательских изображений пока не реализована.
+- Профиль ответа: `{ "userId":1, "properties":[...], "interests":[...] }`. Чужие скрытые поля отсутствуют полностью. Необязательное поле avatarUrl содержит /avatars/demo-01.svg для демо или /api/v1/avatars/{userId}?v={version} для загруженного фото.
+- `POST /profiles/me/avatar`: Bearer, multipart/form-data, поле file; один JPEG/PNG до 5 МБ и 25 мегапикселей. Сервер проверяет содержимое, уменьшает до 1200 px и перекодирует в JPEG без исходных метаданных. Ответ — обновлённый профиль.
+- `DELETE /profiles/me/avatar` → обновлённый профиль без пользовательского фото; демо-SVG восстанавливается, если был. Меняется только текущий пользователь.
+- `GET /avatars/{userId}` → публичный image/jpeg, no-cache и X-Content-Type-Options: nosniff; 404, если фото отсутствует. Замена меняет version в URL. Размер >5 МБ — 413, неподдерживаемый/повреждённый формат — 400. Фото публично и не имеет настройки скрытия.
 - `GET /interests` → `{ "items": ["Музыка", "Кино", ...] }`. Числовых interestIds в этом прототипе нет. Отдельный PUT interests заменён атомарным сохранением профиля.
 - `GET /preferences/me`, `PUT /preferences/me` → `{ "minAge":18, "maxAge":60 }`; PUT принимает ту же структуру.
 
 ## Подбор и реакции
 - `GET /recommendations?limit=20` → `{ "items":[{...profile, "commonInterests":["Кофе"], "compatibilityScore":0.5}], "skippedCount":2 }`.
+- `POST /recommendations/next?limit=20` → тот же ответ плюс `cycleRestarted:boolean`. Тело не нужно. Пока есть непросмотренные подходящие анкеты, возвращает их. После исчерпания под блокировкой пользователя сбрасывает собственные Skip и возвращает новый круг; Like, чужая история, Match и сообщения сохраняются. Если подходящих пропущенных нет, возвращает пустую выдачу без сброса. GET /recommendations историю не меняет.
 - limit ограничивается диапазоном 1–50. Сортировка score ↓, userId ↑. Неполный профиль — 409, пустая выдача — 200.
 - `POST /users/{userId}/like`, `POST /users/{userId}/skip` → `{ "liked":true, "skipped":false, "matched":true, "matchId":15 }`. При отсутствии match `matchId:null`.
 - Повторная реакция — 409, self — 400, неизвестный user — 404. Тела запросов не нужны.

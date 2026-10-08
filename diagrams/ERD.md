@@ -18,6 +18,8 @@ erDiagram
     varchar email UK
     varchar password_hash
     varchar avatar_key
+    bytea avatar_image
+    varchar avatar_version
   }
   profile_properties {
     bigint id PK
