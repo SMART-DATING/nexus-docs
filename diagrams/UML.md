@@ -1,30 +1,39 @@
-# Основные классы
+# UML текущего прототипа
+
 ```mermaid
 classDiagram
-  ApiController --> NexusService
-  SecurityConfig --> NexusService : identify
-  NexusService --> UserAccountRepository
-  NexusService --> AvatarImages : normalize
-  NexusService --> InterestRepository
-  NexusService --> UserInterestRepository
-  NexusService --> PreferenceRepository
-  NexusService --> ProfilePropertyRepository
-  NexusService --> ReactionRepository
-  NexusService --> PairMatchRepository
-  NexusService --> ChatMessageRepository
-  NexusService --> NoticeRepository
-  NexusService --> SessionTokenRepository
-  class NexusService {
-    authenticate(credentials, register)
-    identify(header)
-    saveProfile(userId, profile)
-    recommend(userId, limit)
-    nextRecommendations(userId, limit)
-    uploadAvatar(userId, file)
-    removeAvatar(userId)
-    react(actorId, targetId, like)
-    match(userId, matchId)
-    send(userId, matchId, text)
-  }
+ ApiController --> NexusService
+ ApiController --> ContextService
+ ApiController --> GalleryService
+ NexusService --> ContextService
+ NexusService --> GalleryService
+ ContextService --> SemanticEncoder
+ ContextService --> PrivateContextRepository
+ GalleryService --> ProfilePhotoRepository
+ GalleryService --> AvatarImages
+ NexusService --> UserAccountRepository
+ NexusService --> ReactionRepository
+ NexusService --> PairMatchRepository
+ NexusService --> ChatMessageRepository
+ class SemanticEncoder {
+  encode(text) double[]
+  tokenize(text) List
+  cosine(a,b) double
+ }
+ class ContextService {
+  mine(userId)
+  save(userId,id,title,content)
+  delete(userId,id)
+  vector(userId) double[]
+ }
+ class GalleryService {
+  view(targetId,viewerId)
+  image(photoId,access)
+  add(userId,file)
+  replace(userId,photoId,file)
+  delete(userId,photoId)
+  reorder(userId,ids)
+ }
 ```
-DTO Requests отделяет входные данные от JPA-сущностей. Публичный профиль проецируется сервисом с учётом visible. Общий транзакционный сервис выбран для небольшого прототипа; выделение Auth/Profile/Recommendation/Chat сервисов — направление развития.
+
+Сущности и связи показаны в ERD.md. На клиенте App управляет маршрутом/сессией, ContextEditor — собственными рассказами, PhotoUpload — галереей владельца, PhotoGallery — только разрешёнными кадрами кандидата, SwipeDeck — жестом и состоянием реакции. api.ts добавляет Bearer к JSON/multipart-запросам; браузер загружает изображения по временным access-URL без сессионного токена в адресе.

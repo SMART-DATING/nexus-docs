@@ -3,6 +3,7 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 (cd "$ROOT/../nexus-frontend" && npm ci && npm run build)
 cd "$ROOT/../nexus-backend"
+sh scripts/download-model.sh
 ./mvnw clean test
 mkdir -p target/classes/static
 cp -R "$ROOT/../nexus-frontend/dist/." target/classes/static/

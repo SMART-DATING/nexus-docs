@@ -10,6 +10,7 @@ try {
 } finally { Pop-Location }
 Push-Location $backend
 try {
+  & ./scripts/download-model.ps1
   .\mvnw.cmd clean test
   if ($LASTEXITCODE) { throw 'Backend tests failed' }
   New-Item -ItemType Directory -Force -Path 'target/classes/static' | Out-Null

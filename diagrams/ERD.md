@@ -2,6 +2,8 @@
 
 ```mermaid
 erDiagram
+  users ||--o{ private_contexts : writes
+  users ||--o{ profile_photos : uploads
   users ||--o{ profile_properties : owns
   users ||--o{ user_interests : selects
   interests ||--o{ user_interests : selected
@@ -20,6 +22,24 @@ erDiagram
     varchar avatar_key
     bytea avatar_image
     varchar avatar_version
+    boolean gallery_migrated
+  }
+  private_contexts {
+    bigint id PK
+    bigint user_id
+    varchar title
+    varchar content
+    varchar embedding
+    varchar model_version
+    timestamp updated_at
+  }
+  profile_photos {
+    bigint id PK
+    bigint user_id
+    int position
+    bytea image
+    varchar demo_resource
+    varchar version
   }
   profile_properties {
     bigint id PK
@@ -79,8 +99,8 @@ erDiagram
   }
 ```
 
-В новой базе 10 предметных/служебных таблиц, каждая соответствует JPA-сущности. Уникальны email, имя интереса, preferences.user_id, пары profile_properties(user_id,name), user_interests(user_id,interest_id), reactions(actor_id,target_id), matches(first_id,second_id).
+В новой базе 12 предметных/служебных таблиц, каждая соответствует JPA-сущности. Уникальны email, имя интереса, preferences.user_id, пары profile_properties(user_id,name), user_interests(user_id,interest_id), reactions(actor_id,target_id), matches(first_id,second_id).
 
 UserInterest имеет физические FK к UserAccount и Interest, Preference — FK к UserAccount. Остальные связи представлены ID и проверяются сервисом; удаления сущностей в API нет. Перед добавлением удаления нужны полные FK и политика каскадов.
 
-В ранее созданной базе могут остаться старые user_account_interests и users.min_age/max_age. CatalogueData переносит их значения в новые сущности; старые данные сохраняются для восстановления и не являются текущей моделью. Profile, Photo, EmbeddingVector и Recommendation как таблицы отсутствуют.
+В ранее созданной базе могут остаться старые user_account_interests и users.min_age/max_age. CatalogueData переносит их значения в новые сущности; старые данные сохраняются для восстановления и не являются текущей моделью. Отдельной таблицы Profile нет; фото — profile_photos, личный текст и его версионированный вектор — private_contexts. EmbeddingVector и Recommendation отдельными таблицами не представлены. Исходные avatar_image/avatar_version сохраняются для совместимости после переноса в галерею.
