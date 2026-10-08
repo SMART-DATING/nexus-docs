@@ -4,6 +4,7 @@ classDiagram
   ApiController --> NexusService
   SecurityConfig --> NexusService : identify
   NexusService --> UserAccountRepository
+  NexusService --> AvatarImages : normalize
   NexusService --> InterestRepository
   NexusService --> UserInterestRepository
   NexusService --> PreferenceRepository
@@ -18,6 +19,9 @@ classDiagram
     identify(header)
     saveProfile(userId, profile)
     recommend(userId, limit)
+    nextRecommendations(userId, limit)
+    uploadAvatar(userId, file)
+    removeAvatar(userId)
     react(actorId, targetId, like)
     match(userId, matchId)
     send(userId, matchId, text)
