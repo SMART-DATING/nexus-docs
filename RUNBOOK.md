@@ -38,7 +38,7 @@ npm run dev
 В docs есть build-demo.ps1 для Windows и build-demo.sh для Linux. Они собирают frontend и включают dist в backend JAR. После сборки запустить JAR и открыть 8080. Готовый комплект START.cmd + nexus-demo.jar не требует Maven, npm или Docker; требуется Java 21.
 
 ## Демонстрация
-Пароль всех шести вымышленных аккаунтов — `NexusDemo2026!`: demo@nexus.local (Алекс), demo1@nexus.local (Саша), demo2–demo5@nexus.local. Инициализация включается NEXUS_DEMO=true или --nexus.demo=true; полный Compose включает её.
+Пароль всех 14 вымышленных аккаунтов — `NexusDemo2026!`: demo@nexus.local (Алекс), demo1@nexus.local (Саша), demo2–demo13@nexus.local. Инициализация включается NEXUS_DEMO=true или --nexus.demo=true; полный Compose включает её.
 
 1. Открыть demo в первой вкладке, demo1 во второй. Вкладки используют отдельные sessionStorage.
 2. В первой поставить like Саше, во второй — Алексу.

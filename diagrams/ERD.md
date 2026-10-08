@@ -17,6 +17,7 @@ erDiagram
     bigint id PK
     varchar email UK
     varchar password_hash
+    varchar avatar_key
   }
   profile_properties {
     bigint id PK
@@ -81,4 +82,3 @@ erDiagram
 UserInterest имеет физические FK к UserAccount и Interest, Preference — FK к UserAccount. Остальные связи представлены ID и проверяются сервисом; удаления сущностей в API нет. Перед добавлением удаления нужны полные FK и политика каскадов.
 
 В ранее созданной базе могут остаться старые user_account_interests и users.min_age/max_age. CatalogueData переносит их значения в новые сущности; старые данные сохраняются для восстановления и не являются текущей моделью. Profile, Photo, EmbeddingVector и Recommendation как таблицы отсутствуют.
-
