@@ -19,7 +19,7 @@ Backend: скачать модель scripts/download-model.ps1/.sh, затем 
 
 Frontend: npm ci, npm test, npm run build. На запущенном полном стеке: npm run smoke -- http://127.0.0.1:8088; для H2/Vite — адрес 5173. Smoke создаёт новые тестовые аккаунты; они остаются в базе.
 
-GitHub Actions frontend строит PostgreSQL/backend/nginx, проверяет legacy category и HTTP smoke, затем H2/backend/Vite. Backend workflow отдельно запускает H2 и PostgreSQL API-тесты. Текущий полный прогон: https://github.com/SMART-DATING/nexus-frontend/actions/runs/37837636379 — окончательный результат фиксируется после завершения.
+GitHub Actions frontend строит PostgreSQL/backend/nginx, проверяет legacy category и HTTP smoke, затем H2/backend/Vite. Backend workflow отдельно запускает H2 и PostgreSQL API-тесты. Текущий полный прогон: https://github.com/SMART-DATING/nexus-frontend/actions/runs/37838223350 — успешно: 23 frontend-теста, Docker PostgreSQL/nginx и H2/Vite, все 10 дополнительных PostgreSQL API-тестов без пропусков.
 
 ## Границы проверки
 Локально PostgreSQL не считается проверенным только из-за успешной H2. Docker проверяется в CI; доступ из локальной среды к Docker Engine ограничен. Нагрузочных испытаний, независимого корпуса для ML и пользовательского исследования нет. Учебный прототип требует дополнительной подготовки перед публичным запуском.
