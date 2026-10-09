@@ -14,6 +14,7 @@ Nexus помогает знакомиться по общим интересам
 - [Архитектура](architecture/system-architecture.md), [API](architecture/api-contracts.md), [модель](architecture/MODEL.md)
 - [Первое знакомство и голос](design/onboarding.md)
 - [Интерфейс: исследование и решения](design/interface.md)
+- [Данные, приватность и условия публичного запуска](privacy/data-handling.md)
 - [Telegram: варианты интеграции](architecture/telegram.md)
 - [ERD](diagrams/ERD.md), [UML](diagrams/UML.md)
 - [История изменений](changelog.md) и [план развития](roadmap.md)
