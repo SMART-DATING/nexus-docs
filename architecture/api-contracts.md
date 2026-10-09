@@ -1,296 +1,82 @@
-# API-контракты Nexus (MVP)
+# REST API прототипа
 
-Базовый префикс:
+Префикс `/api/v1`, JSON UTF-8. Для всех методов, кроме health/register/login и GET /photos/{id} с отдельным временным access-ticket, заголовок `Authorization: Bearer <accessToken>` обязателен. Ошибки: `{ "status": 400, "message": "..." }`; обработчик валидации также добавляет timestamp. Клиент должен опираться на status/message.
 
-```text
-/api/v1
-```
+## Авторизация
+- `GET /health` → `{ "status": "ok" }`.
+- `POST /auth/register` → 201; `POST /auth/login` → 200. Тело: `{ "email":"a@example.com", "password":"Password123!" }`.
+- Ответ обоих: `{ "accessToken":"...", "tokenType":"Bearer", "expiresAt":"ISO-8601", "user": { "id":1, "email":"a@example.com", "profile":{...}, "preferences":{"minAge":18,"maxAge":60} } }`.
+- Токен непрозрачный (не JWT), живёт 24 часа.
+- `POST /auth/logout` → 204; токен отзывается.
+- `GET /users/me` → объект user.
 
-Формат данных: JSON.
-
-Для защищённых endpoint:
-
-```http
-Authorization: Bearer <token>
-```
-
-## 1. Единый формат ошибки
-
+## Профиль, интересы, предпочтения
+- `GET /profiles/me` → профиль со всеми собственными свойствами.
+- `GET /profiles/{userId}` → публичный профиль; для собственного ID включает скрытые поля.
+- `PUT /profiles/me` → сохранённый профиль; тело полностью заменяет четыре свойства и набор интересов:
 ```json
 {
-  "timestamp": "2026-09-28T12:00:00Z",
-  "status": 400,
-  "code": "VALIDATION_ERROR",
-  "message": "Request validation failed",
-  "details": {
-    "email": "Invalid email format"
-  }
+  "properties": [
+    {"name":"display_name","value":"Алекс","visible":true},
+    {"name":"bio","value":"Люблю музыку","visible":true},
+    {"name":"birth_date","value":"2001-04-12","visible":false},
+    {"name":"city","value":"Москва","visible":true}
+  ],
+  "interests":["Музыка","Кофе"]
 }
 ```
+- Профиль: `{userId,properties,interests,photos:[{id,position,url}],photoCount,photoAllowance,avatarUrl?}`. Свой профиль дополнительно содержит contextCount. Чужие скрытые свойства и скрытые фото (включая ID/URL) полностью отсутствуют. photoCount — общее число, photoAllowance — число собственных фото смотрящего. avatarUrl — первое разрешённое фото; без своих фото у смотрящего поле отсутствует.
+- `POST /profiles/me/photos`: multipart поле file, JPEG/PNG ≤5 МБ и 25 MP; ≤1200 px после перекодирования в JPEG. Максимум 6, превышение 409. Ответ 200, свой профиль.
+- `PUT /profiles/me/photos/{photoId}`: тот же формат, замена только своего фото; чужое 403.
+- `DELETE /profiles/me/photos/{photoId}` → 200, свой профиль; позиции уплотняются, квота уменьшается.
+- `PUT /profiles/me/photos/order`, `{ "ids":[3,1,2] }` → 200, свой профиль; все свои ID ровно один раз, иначе 400.
+- `GET /photos/{id}?access={ticket}` → image/jpeg (пользовательское) или image/svg+xml (демо), Cache-Control: private, no-store, nosniff. Случайный ticket выдан в составе разрешённого профиля, действует 15 минут, отзывается при выходе. При каждом чтении проверяются версия, смотрящий, актуальная квота и позиция. Нет/неверный/истёкший доступ — 403; удалённое фото — 404. Намеренно скопированная ссылка предоставляет временный доступ, как любой bearer URL; API не обещает защиту от копирования разрешённого изображения.
+- Совместимость: `POST /profiles/me/avatar` заменяет первое фото (создаёт при отсутствии), DELETE удаляет первое без восстановления. GET /avatars/{userId} тоже требует access-ticket для первого фото; публичного обхода квоты нет.
 
----
+## Закрытые личные рассказы
+- `GET /contexts/me` → `{items:[{id,title,content,updatedAt}],modelAvailable,modelVersion}`. Только свои рассказы; векторы не выдаются.
+- `POST /contexts/me`, `{title,content}` → 201, сохранённый рассказ; до 12 рассказов, title 1–60, content 20–6000 после trim. Превышение количества — 409.
+- `PUT /contexts/me/{id}` → 200, рассказ с пересчитанным embedding; чужой ID — 403.
+- `DELETE /contexts/me/{id}` → 204, рассказ больше не участвует в подборе; чужой ID — 403.
+- Эндпоинта для чужих рассказов нет. Названия, тексты и embeddings отсутствуют в публичных профилях, рекомендациях и matches. При неустановленной модели сохранение — 503; cloud fallback отсутствует.
 
-## 2. Auth
+- `GET /interests` → `{ "items": ["Музыка", "Кино", ...] }`. Числовых interestIds в этом прототипе нет. Отдельный PUT interests заменён атомарным сохранением профиля.
+- `GET /preferences/me`, `PUT /preferences/me` → `{ "minAge":18, "maxAge":60 }`; PUT принимает ту же структуру.
 
-### POST /auth/register
+## Подбор и реакции
+- `GET /recommendations?limit=20` → `{ "items":[{...profile, "commonInterests":["Кофе"], "compatibilityScore":0.5, "matchingBasis":"semantic"}], "skippedCount":2 }`.
+- `POST /recommendations/next?limit=20` → тот же ответ плюс `cycleRestarted:boolean`. Тело не нужно. Пока есть непросмотренные подходящие анкеты, возвращает их. После исчерпания под блокировкой пользователя сбрасывает собственные Skip и возвращает новый круг; Like, чужая история, Match и сообщения сохраняются. Если подходящих пропущенных нет, возвращает пустую выдачу без сброса. GET /recommendations историю не меняет.
+- limit ограничивается диапазоном 1–50. Сортировка score ↓, userId ↑. Неполный профиль или отсутствие собственного рассказа — 409, пустая выдача — 200.
+- `POST /users/{userId}/like`, `POST /users/{userId}/skip` → `{ "liked":true, "skipped":false, "matched":true, "matchId":15 }`. При отсутствии match `matchId:null`.
+- Повторная реакция — 409, self — 400, неизвестный user — 404. Тела запросов не нужны.
 
-Request:
-```json
-{
-  "email": "user@example.com",
-  "password": "StrongPassword123"
-}
-```
+- `POST /recommendations/restart` → `{ "restored":2 }`. Bearer обязателен, тело не нужно. Удаляются только Skip запрашивающего пользователя; Like, совпадения, сообщения и чужие реакции сохраняются. Повтор без новых Skip возвращает 0. Возрастной фильтр применяется к повторной выдаче как обычно.
 
-Responses:
-- `201 Created`
-- `400 Bad Request`
-- `409 Conflict` — email уже занят.
+## Match и чат
+- `GET /matches` → `{ "items":[{ "id":15, "user":{...publicProfile}, "createdAt":"ISO-8601", "unreadCount":2 }] }`. Счётчик относится только к входящим сообщениям текущего участника.
+- `GET /matches/{matchId}` → один элемент. Дополнительный alias `GET /match/{matchId}` сохранён для совместимости.
+- Маршрут страницы frontend: `/match/{matchId}`. Разделы: `/`, `/#matches`, `/#profile`, `/#notifications`. Навигация синхронизирует адрес и экран, включая обновление и историю браузера.
+- `GET /matches/{matchId}/messages?after=0` → `{ "items":[{ "id":1, "matchId":15, "senderId":1, "text":"Привет", "createdAt":"ISO-8601" }] }`.
+- Возвращаются первые 100 сообщений с id > after, в порядке ID. Для следующей порции передайте последний ID. Для опроса новых — тот же курсор.
+- `POST /matches/{matchId}/messages`, тело `{ "text":"Привет" }` → 201, объект сообщения. От 1 непустого до 5000 символов; внешние пробелы удаляются.
+- Только участникам: 403 для постороннего, 404 при отсутствии match.
+- `PATCH /matches/{matchId}/read`, `{ "throughId":42 }` → `{ "unreadCount":0 }`. Подтверждает чтение входящих сообщений с ID ≤ throughId; новые сообщения с большим ID остаются непрочитанными. GET истории ничего не помечает. Положительный throughId обязателен, иначе 400; авторизация и проверка участия такие же, как у истории. Старые сообщения с null в readByRecipient считаются непрочитанными.
+- Клиент подтверждает полученную историю только в открытом видимом чате. Это состояние чтения для счётчика, не подтверждение фактического прочтения человеком. Прямой путь к закрытым рассказам: `/#profile/story`.
 
-### POST /auth/login
+## Уведомления
+- `GET /notifications` → `{ "items":[{ "id":1, "userId":1, "matchId":15, "text":"...", "seen":false, "createdAt":"ISO-8601" }] }`, последние 100 по ID ↓.
+- `PATCH /notifications/{id}/read` → объект с `seen:true`, идемпотентно; чужой ID — 403.
 
-Request:
-```json
-{
-  "email": "user@example.com",
-  "password": "StrongPassword123"
-}
-```
+Статусы: 200/201/204 — успех; 400 — данные; 401 — сессия/вход; 403 — чужой ресурс; 404 — отсутствие; 409 — дубликат/незавершённый профиль. Необработанные ошибки могут вернуть стандартный ответ Spring, детали исключений не раскрываются.
 
-Response `200 OK`:
-```json
-{
-  "accessToken": "<token>",
-  "tokenType": "Bearer"
-}
-```
+Score — косинусное сходство 312-мерных векторов личных рассказов, диапазон −1..1. UI показывает неотрицательное сходство в процентах с подписью «сходства рассказов»; это не вероятность отношений. Общие публичные темы не влияют на score. Кандидаты без личного контекста исключены.
 
-Responses:
-- `200 OK`
-- `401 Unauthorized`
 
-### GET /users/me
-Возвращает данные текущего пользователя.
+## Видимость и выгрузка данных
 
----
+- `GET /users/me` дополнительно возвращает `discoveryHidden:boolean`; null в старой базе трактуется как false.
+- `PUT /users/me/discovery` принимает `{ "hidden":true }`, возвращает `{ "hidden":true }`. Bearer обязателен; отсутствие hidden — 400. Анкета исчезает из подбора, профиль и фотографии недоступны посторонним, включая ранее выданные медийные ссылки. Существующие совпадения и чаты продолжают работать. Скрытый пользователь не может отправить новую реакцию (409), реакция на скрытую анкету — 404.
+- `GET /users/me/data` → `{ formatVersion:1, exportedAt, account, photos:[{position,contentType,base64}], privateContexts, reactions:[{targetUserId,liked}], sentMessages:[{matchId,text,createdAt}] }`. Только собственные данные; хеши паролей, токены, чужие рассказы и полученные сообщения исключены. Ответ не кешируется. Фото включаются целиком; большой файл может достигать десятков МБ.
+- UI: `/` без сессии — публичная главная; `/#login` и `/#register` — форма входа/регистрации поверх неё. Кнопка закрытия возвращает главную; Back/Forward синхронизируют открытие формы. После входа корневой экран — подборка.
 
-## 3. Profile
-
-### GET /profiles/me
-Получить собственный профиль.
-
-### PUT /profiles/me
-
-Request:
-```json
-{
-  "displayName": "Alex",
-  "bio": "Люблю backend, музыку и путешествия"
-}
-```
-
-### GET /profiles/{userId}
-Получить публичную часть профиля доступного пользователя.
-
----
-
-## 4. Interest
-
-### GET /interests
-Получить справочник интересов.
-
-### PUT /profiles/me/interests
-
-Request:
-```json
-{
-  "interestIds": [1, 4, 7]
-}
-```
-
-Результат: актуальный набор интересов пользователя.
-
----
-
-## 5. Preference
-
-### GET /preferences/me
-Получить предпочтения.
-
-### PUT /preferences/me
-
-Пример:
-```json
-{
-  "minAge": 18,
-  "maxAge": 30
-}
-```
-
-Набор полей может уточняться после согласования предметной области.
-
----
-
-## 6. Recommendation
-
-### GET /recommendations?limit=20
-
-Response:
-```json
-{
-  "items": [
-    {
-      "userId": 42,
-      "displayName": "Sam",
-      "bio": "Java, кино, бег",
-      "commonInterests": [
-        {"id": 1, "name": "Java"},
-        {"id": 5, "name": "Running"}
-      ],
-      "compatibilityScore": 0.82
-    }
-  ]
-}
-```
-
-Важные правила:
-- текущий пользователь исключается;
-- обработанные рекомендации учитываются;
-- недоступные профили не возвращаются.
-
----
-
-## 7. Like / Skip
-
-### POST /users/{userId}/like
-
-Response:
-```json
-{
-  "liked": true,
-  "matched": true,
-  "matchId": 15
-}
-```
-
-Если взаимного Like нет:
-```json
-{
-  "liked": true,
-  "matched": false,
-  "matchId": null
-}
-```
-
-### POST /users/{userId}/skip
-
-Response:
-```json
-{
-  "skipped": true
-}
-```
-
-Ошибки:
-- `400` — попытка реакции на самого себя;
-- `404` — пользователь не найден;
-- `409` — реакция уже обработана.
-
----
-
-## 8. Match
-
-### GET /matches
-
-Response:
-```json
-{
-  "items": [
-    {
-      "id": 15,
-      "user": {
-        "id": 42,
-        "displayName": "Sam"
-      },
-      "createdAt": "2026-09-28T09:00:00Z"
-    }
-  ]
-}
-```
-
-### GET /matches/{matchId}
-Возвращает Match только его участнику.
-
----
-
-## 9. Message
-
-### GET /matches/{matchId}/messages
-
-Response:
-```json
-{
-  "items": [
-    {
-      "id": 101,
-      "senderId": 7,
-      "text": "Привет!",
-      "createdAt": "2026-09-28T09:10:00Z",
-      "read": false
-    }
-  ]
-}
-```
-
-### POST /matches/{matchId}/messages
-
-Request:
-```json
-{
-  "text": "Привет!"
-}
-```
-
-Responses:
-- `201 Created`
-- `400 Bad Request` — пустой/слишком длинный текст;
-- `403 Forbidden` — пользователь не участник Match;
-- `404 Not Found` — Match отсутствует.
-
----
-
-## 10. Notification
-
-### GET /notifications
-
-### PATCH /notifications/{notificationId}/read
-
-Response:
-```json
-{
-  "id": 55,
-  "read": true
-}
-```
-
----
-
-## 11. HTTP-статусы
-
-| Статус | Значение |
-|---|---|
-| 200 | Успешное чтение/изменение |
-| 201 | Ресурс создан |
-| 204 | Успешно, тела ответа нет |
-| 400 | Ошибка входных данных |
-| 401 | Не авторизован |
-| 403 | Нет прав |
-| 404 | Ресурс не найден |
-| 409 | Конфликт состояния/дубликат |
-| 500 | Необработанная серверная ошибка |
-
-## 12. Что вынести в Swagger
-
-После появления backend endpoints этот документ следует синхронизировать с
-OpenAPI/Swagger. Источником истины по техническому контракту в коде должен стать
-OpenAPI, а этот Markdown — понятным описанием решений для защиты.
+Ограничения и точный состав выгрузки: [данные и приватность](../privacy/data-handling.md).

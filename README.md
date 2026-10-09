@@ -1,58 +1,30 @@
-# Nexus — Документация к лабораторной работе №2
+# Nexus
 
-**Nexus** — клиент-серверное веб-приложение для подбора пользователей на основе интересов, предпочтений и истории взаимодействий.
+Nexus помогает знакомиться по общим интересам и взглядам. Пользователь рассказывает о себе в закрытом пространстве, получает подборку по смысловой близости и начинает общение после взаимной симпатии.
 
-Этот каталог содержит проектную документацию, необходимую для второго чекпоинта: анализ бизнес-требований, функциональные и нефункциональные требования, варианты использования, архитектуру, API-контракты, ERD, роли, workflow и roadmap.
+## Продукт
 
----
+Короткое знакомство через темы и наводящие вопросы; текстовый или голосовой ответ с редактированием перед сохранением. До шести фотографий с взаимным раскрытием. Локальная NLP-модель, свайпы, повтор пропущенных анкет, взаимные совпадения, чат и уведомления.
 
-## 📂 Структура каталога
+## Документация
 
-```text
-nexus-docs/
-├── 📄 README.md                      # Главная страница документации
-├── 📋 LAB2_CHECKLIST.md              # Чеклист критериев лабораторной работы №2
-│
-├── 🎯 requirements/                  # Требования к системе
-│   ├── business-requirements.md      # Анализ бизнес-требований и целей
-│   ├── functional-requirements.md    # Функциональные требования
-│   ├── non-functional-requirements.md# Нефункциональные требования (SLA, нагрузка, безопасность)
-│   └── use-cases.md                  # Варианты использования (Use Cases)
-│
-├── 🏗️ architecture/                  # Архитектура и спецификации
-│   ├── system-architecture.md        # Описание системной архитектуры и компонентов
-│   └── api-contracts.md              # Спецификация REST API / контракты
-│
-├── 📊 diagrams/                      # Диаграммы и схемы
-│   └── ERD.md                        # ER-диаграмма базы данных (Entity-Relationship)
-│
-├── 👥 team/                          # Организация работы команды
-│   ├── roles.md                      # Распределение ролей и зон ответственности
-│   └── workflow.md                   # Регламент разработки, GitFlow и Code Review
-│
-└── 🗺️ roadmap.md                     # Дорожная карта и этапы реализации
-```
+- [Запуск](RUNBOOK.md) и [проверки](TESTING.md)
+- [Продуктовые цели](requirements/business-requirements.md)
+- [Функциональные требования](requirements/functional-requirements.md), [ограничения](requirements/non-functional-requirements.md), [сценарии](requirements/use-cases.md)
+- [Архитектура](architecture/system-architecture.md), [API](architecture/api-contracts.md), [модель](architecture/MODEL.md)
+- [Первое знакомство и голос](design/onboarding.md)
+- [Интерфейс: исследование и решения](design/interface.md)
+- [Данные, приватность и условия публичного запуска](privacy/data-handling.md)
+- [Telegram: варианты интеграции](architecture/telegram.md)
+- [ERD](diagrams/ERD.md), [UML](diagrams/UML.md)
+- [История изменений](changelog.md) и [план развития](roadmap.md)
 
----
+## Репозитории
 
-## 🛠 Технологический стек
+| Репозиторий                                                      | Назначение                                   |
+| ---------------------------------------------------------------- | -------------------------------------------- |
+| [nexus-backend](https://github.com/SMART-DATING/nexus-backend)   | Java / Spring Boot API, хранение данных, NLP |
+| [nexus-frontend](https://github.com/SMART-DATING/nexus-frontend) | React / TypeScript приложение                |
+| [nexus-docs](https://github.com/SMART-DATING/nexus-docs)         | Продукт, архитектура и эксплуатация          |
 
-### Frontend
-- **Framework / Library:** React
-- **Language:** TypeScript
-- **Build Tool:** Vite
-
-### Backend
-- **Language:** Java
-- **Framework:** Spring Boot
-- **ORM / Data Access:** Spring Data JPA / Hibernate
-- **Security:** Spring Security
-
-### Database
-- PostgreSQL
-
----
-
-## 📌 Статус проекта
-
-Документация описывает **целевое состояние** проекта на момент сдачи лабораторной работы №2. Фактически реализованные функции и текущий прогресс отслеживаются в **Issues / Project Board** и в `README` соответствующих репозиториев (Backend / Frontend).
+Рабочий прототип и актуальная документация находятся в `main`. Новые изменения оформляются отдельными ветками и Pull Request в `main`. Публичный запуск пока не подготовлен: необходимые работы перечислены в roadmap. Исходные материалы и прежние решения сохранены в `archive/`.
