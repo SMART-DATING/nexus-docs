@@ -13,16 +13,17 @@ Nexus помогает знакомиться по общим интересам
 - [Функциональные требования](requirements/functional-requirements.md), [ограничения](requirements/non-functional-requirements.md), [сценарии](requirements/use-cases.md)
 - [Архитектура](architecture/system-architecture.md), [API](architecture/api-contracts.md), [модель](architecture/MODEL.md)
 - [Первое знакомство и голос](design/onboarding.md)
+- [Интерфейс: исследование и решения](design/interface.md)
 - [Telegram: варианты интеграции](architecture/telegram.md)
 - [ERD](diagrams/ERD.md), [UML](diagrams/UML.md)
 - [История изменений](changelog.md) и [план развития](roadmap.md)
 
 ## Репозитории
 
-| Репозиторий | Назначение |
-| --- | --- |
-| [nexus-backend](https://github.com/SMART-DATING/nexus-backend) | Java / Spring Boot API, хранение данных, NLP |
-| [nexus-frontend](https://github.com/SMART-DATING/nexus-frontend) | React / TypeScript приложение |
-| [nexus-docs](https://github.com/SMART-DATING/nexus-docs) | Продукт, архитектура и эксплуатация |
+| Репозиторий                                                      | Назначение                                   |
+| ---------------------------------------------------------------- | -------------------------------------------- |
+| [nexus-backend](https://github.com/SMART-DATING/nexus-backend)   | Java / Spring Boot API, хранение данных, NLP |
+| [nexus-frontend](https://github.com/SMART-DATING/nexus-frontend) | React / TypeScript приложение                |
+| [nexus-docs](https://github.com/SMART-DATING/nexus-docs)         | Продукт, архитектура и эксплуатация          |
 
 Текущая разработка ведётся в `feature/working-prototype`. Публичный запуск пока не подготовлен: необходимые работы перечислены в roadmap. Исходные материалы и прежние решения сохранены в `archive/`.
