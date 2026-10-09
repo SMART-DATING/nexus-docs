@@ -11,7 +11,7 @@
 14 демоанкет (demo и demo1…demo13) вымышлены, содержат шесть локальных иллюстраций и личные рассказы. Повторный запуск дополняет недостающее, не перезаписывает заполненные рассказы, профиль или переписки. У обычного существующего аккаунта для нового подбора нужно добавить личный рассказ.
 
 ## Из исходников без Docker
-Клонировать nexus-backend, nexus-frontend, nexus-docs рядом, все из ветки feature/working-prototype. Нужны JDK 21 и Node.js 22.12+. В backend:
+Клонировать nexus-backend, nexus-frontend, nexus-docs рядом, все из ветки main. Нужны JDK 21 и Node.js 22.12+. В backend:
 ```powershell
 pwsh -File scripts/download-model.ps1
 .\mvnw.cmd clean package
