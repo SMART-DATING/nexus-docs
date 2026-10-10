@@ -19,6 +19,7 @@ erDiagram
     bigint id PK
     varchar email UK
     varchar password_hash
+    varchar gender
     varchar avatar_key
     bytea avatar_image
     varchar avatar_version
@@ -63,6 +64,7 @@ erDiagram
     bigint user_id FK
     int min_age
     int max_age
+    varchar interested_in
   }
   reactions {
     bigint id PK
