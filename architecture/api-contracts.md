@@ -4,8 +4,9 @@
 
 ## Авторизация
 - `GET /health` → `{ "status": "ok" }`.
-- `POST /auth/register` → 201; `POST /auth/login` → 200. Тело: `{ "email":"a@example.com", "password":"Password123!" }`.
-- Ответ обоих: `{ "accessToken":"...", "tokenType":"Bearer", "expiresAt":"ISO-8601", "user": { "id":1, "email":"a@example.com", "profile":{...}, "preferences":{"minAge":18,"maxAge":60} } }`.
+- `POST /auth/register` → 201. Новый интерфейс передаёт `{ "email":"a@example.com", "login":"nexus_friend", "password":"Password123!", "passwordConfirmation":"Password123!" }`. Логин: 3–32 буквы/цифры или `_.-`, уникален без учёта регистра. При переданном логине подтверждение пароля обязательно и должно совпадать; несовпадение 400, занятый логин/email 409.
+- `POST /auth/login` → 200. Вход по `{ "login":"nexus_friend", "password":"Password123!" }` или по прежнему `{ "email":"a@example.com", "password":"Password123!" }`. У существующих пользователей nullable login, вход по email сохраняется. Старый API регистрации только с email/password поддерживается для совместимости.
+- Ответ обоих: `{ "accessToken":"...", "tokenType":"Bearer", "expiresAt":"ISO-8601", "user": { "id":1, "email":"a@example.com", "login":"nexus_friend", "profile":{...}, "preferences":{"minAge":18,"maxAge":60} } }`. У прежних аккаунтов login — пустая строка. Логин не входит в публичную анкету.
 - Токен непрозрачный (не JWT), живёт 24 часа.
 - `POST /auth/logout` → 204; токен отзывается.
 - `GET /users/me` → объект user.
