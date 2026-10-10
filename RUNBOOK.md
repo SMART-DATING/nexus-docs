@@ -4,7 +4,7 @@
 1. Остановить прежнее окно backend через Ctrl+C.
 2. Открыть SMART-DATING/START.cmd двойным щелчком. Нужна Java 21+, установленная Corretto определяется автоматически.
 3. Дождаться Started NexusApplication и открыть http://127.0.0.1:8080/.
-4. Войти demo@nexus.local / NexusDemo2026!. Второй аккаунт demo1@nexus.local, пароль тот же.
+4. Зарегистрировать два собственных тестовых аккаунта и загрузить фотографии. Старые рисованные демоанкеты автоматически не создаются.
 
 Оставить окно открытым. В одном JAR уже frontend и backend. Docker, Maven и npm для комплекта не нужны. Рядом обязательно сохранить models/rubert-tiny2/model.onnx и vocab.txt: модель работает локально, без API-ключа и оплаты. Файл БД создаётся в data; обновление комплекта не требует удаления data. Нельзя одновременно запускать два сервера на одном файле H2. Linux: sh START.sh из каталога комплекта.
 
@@ -24,7 +24,7 @@ Linux: sh scripts/download-model.sh, затем ./mvnw вместо .\mvnw.cmd. 
 ## Docker
 Требуется Docker Engine/Desktop с Linux containers. Из frontend: docker compose up --build --wait. Открыть http://127.0.0.1:8088/. Compose запускает PostgreSQL, backend и nginx. Веса загружаются при сборке, в работающем приложении интернет для NLP не требуется.
 
-Из backend: docker compose up --build --wait — только PostgreSQL/API на 8080; NEXUS_DEMO=true включает демоданные. Альтернатива без PostgreSQL: docker compose -f compose.h2.yaml up --build --wait, демо включено, H2 в volume.
+Из backend: docker compose up --build --wait — только PostgreSQL/API на 8080; Прежний NEXUS_DEMO=true больше не создаёт рисованные анкеты. Альтернатива без PostgreSQL: docker compose -f compose.h2.yaml up --build --wait, H2 хранится в volume; тестовые аккаунты регистрируются вручную.
 
 Остановка: соответствующий docker compose down. Не добавлять -v при обычной остановке: это удалит базу. Старый mandatory interests.category поддержан без потери данных. Docker runtime использует glibc JRE для ONNX.
 
