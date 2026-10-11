@@ -9,6 +9,7 @@ Nexus помогает знакомиться по общим интересам
 ## Документация
 
 - [Запуск](RUNBOOK.md) и [проверки](TESTING.md)
+- [Соответствие требованиям лабораторных ООП](LAB_REQUIREMENTS.md)
 - [Продуктовые цели](requirements/business-requirements.md)
 - [Функциональные требования](requirements/functional-requirements.md), [ограничения](requirements/non-functional-requirements.md), [сценарии](requirements/use-cases.md)
 - [Архитектура](architecture/system-architecture.md), [API](architecture/api-contracts.md), [модель](architecture/MODEL.md)
@@ -28,3 +29,7 @@ Nexus помогает знакомиться по общим интересам
 | [nexus-docs](https://github.com/SMART-DATING/nexus-docs)         | Продукт, архитектура и эксплуатация          |
 
 Рабочий прототип и актуальная документация находятся в `main`. Новые изменения оформляются отдельными ветками и Pull Request в `main`. Публичный запуск пока не подготовлен: необходимые работы перечислены в roadmap. Исходные материалы и прежние решения сохранены в `archive/`.
+
+## Материалы дизайна
+
+Актуальный интерфейс реализован в React; решения описаны в `design/`. Ссылка на Figma-проект пока не добавлена. По требованиям лабораторных необходимо добавить реальный URL или согласовать с преподавателем альтернативное представление дизайна. Старые материалы сохраняются в `archive/`.

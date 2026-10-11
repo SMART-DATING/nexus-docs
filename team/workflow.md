@@ -9,8 +9,8 @@
 ## 🌳 Git-стратегия и ветки
 
 ### Основные ветки
-- **`main`** — стабильное состояние, готовое к продакшену
-- **`develop`** — интеграционная ветка для ведения разработки
+- **`main`** — актуальное проверенное состояние прототипа; публичный production-запуск требует отдельной подготовки
+- **`develop`** — сохранённый ранний учебный этап; текущая разработка идёт от `main`
 
 ### Рабочие ветки
 ```
@@ -42,9 +42,9 @@ refactor/recommendation-service
 | 2️⃣ | Указать метаданные | Тип, область, приоритет |
 | 3️⃣ | Добавить в Project | Поместить в GitHub Project Board |
 | 4️⃣ | Назначить ответственного | Указать исполнителя |
-| 5️⃣ | Создать ветку | Новую рабочую ветку от `develop` |
+| 5️⃣ | Создать ветку | Новую рабочую ветку от `main` |
 | 6️⃣ | Разработка | Осмысленные коммиты с соблюдением convention |
-| 7️⃣ | Pull Request | Создать PR в `develop` |
+| 7️⃣ | Pull Request | Создать PR в `main` |
 | 8️⃣ | Связать с Issue | Упомянуть Issue в описании PR |
 | 9️⃣ | Code Review | Провести рецензию кода |
 | 🔟 | Merge & Done | Слить PR и переместить задачу в Done |
@@ -131,16 +131,16 @@ test: add authorization middleware tests
 
 - ✅ Минимум **1 одобрение** (approve)
 - ✅ **Все checks** (CI/CD, линтер, тесты) должны быть green
-- ✅ Ветка должна быть **в синхронизации** с `develop`
+- ✅ Ветка должна быть **в синхронизации** с `main`
 - ✅ **Squash or rebase merge** (по соглашению команды)
 
 ---
 
 ## 🔗 Полезные ссылки
 
-- **GitHub Project:** https://github.com/orgs/nexus-team/projects/[номер]
-- **Repository Backend:** https://github.com/nexus-team/nexus-backend
-- **Repository Frontend:** https://github.com/nexus-team/nexus-frontend
+- **GitHub Project:** https://github.com/orgs/SMART-DATING/projects — ссылка на конкретную доску ещё требует подтверждения
+- **Repository Backend:** https://github.com/SMART-DATING/nexus-backend
+- **Repository Frontend:** https://github.com/SMART-DATING/nexus-frontend
 
 ---
 

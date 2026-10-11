@@ -5,8 +5,16 @@ classDiagram
  ApiController --> NexusService
  ApiController --> ContextService
  ApiController --> GalleryService
+ ApiController --> BlockService
+ ApiController --> DataExportService
  NexusService --> ContextService
  NexusService --> GalleryService
+ NexusService --> BlockService
+ NexusService --> PresenceService
+ NexusService --> ChatPreferenceRepository
+ BlockService --> UserBlockRepository
+ GalleryService --> BlockService
+ DataExportService --> NexusService
  ContextService --> SemanticEncoder
  ContextService --> PrivateContextRepository
  GalleryService --> ProfilePhotoRepository

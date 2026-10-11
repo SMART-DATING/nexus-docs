@@ -15,15 +15,21 @@ erDiagram
   users ||--o{ messages : sends
   users ||--o{ notifications : receives
   matches ||--o{ notifications : refers
+  users ||--o{ user_blocks : actor_or_target
+  users ||--o{ chat_preferences : configures
+  matches ||--o{ chat_preferences : customized
   users {
     bigint id PK
     varchar email UK
+    varchar login UK
     varchar password_hash
     varchar gender
     varchar avatar_key
     bytea avatar_image
     varchar avatar_version
     boolean gallery_migrated
+    boolean discovery_hidden
+    timestamp last_active_at
   }
   private_contexts {
     bigint id PK
@@ -82,6 +88,7 @@ erDiagram
     bigint id PK
     bigint match_id
     bigint sender_id
+    boolean read_by_recipient
     varchar text
     timestamp created_at
   }
@@ -93,6 +100,22 @@ erDiagram
     boolean seen
     timestamp created_at
   }
+  user_blocks {
+    bigint id PK
+    bigint actor_id
+    bigint target_id
+    varchar target_name
+    timestamp created_at
+  }
+  chat_preferences {
+    bigint id PK
+    bigint user_id
+    bigint match_id
+    boolean pinned
+    boolean hidden
+    boolean marked_unread
+    bigint cleared_through_id
+  }
   sessions {
     bigint id PK
     varchar token_hash UK
@@ -101,7 +124,9 @@ erDiagram
   }
 ```
 
-В новой базе 12 предметных/служебных таблиц, каждая соответствует JPA-сущности. Уникальны email, имя интереса, preferences.user_id, пары profile_properties(user_id,name), user_interests(user_id,interest_id), reactions(actor_id,target_id), matches(first_id,second_id).
+В текущей базе 14 предметных/служебных таблиц, каждая соответствует JPA-сущности. Уникальны email, nullable login, имя интереса, preferences.user_id, пары profile_properties(user_id,name), user_interests(user_id,interest_id), reactions(actor_id,target_id), matches(first_id,second_id), user_blocks(actor_id,target_id), chat_preferences(user_id,match_id).
+
+Актуальная схема — Mermaid выше. `ERD.png` сохранён как прежний снимок схемы до добавления блокировок и настроек чата; он не является текущей ERD.
 
 UserInterest имеет физические FK к UserAccount и Interest, Preference — FK к UserAccount. Остальные связи представлены ID и проверяются сервисом; удаления сущностей в API нет. Перед добавлением удаления нужны полные FK и политика каскадов.
 
