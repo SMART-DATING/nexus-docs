@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="title desc">
+<title id="title">Nexus — знакомства на одной волне</title>
+<desc id="desc">Сине-фиолетовый баннер Nexus. Три плавные линии соединяются в общей волне.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#10192e"/><stop offset=".5" stop-color="#192445"/><stop offset="1" stop-color="#30234e"/></linearGradient>
+ <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#559bff"/><stop offset=".55" stop-color="#a299ff"/><stop offset="1" stop-color="#bf8fe8"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#8a75dd" stop-opacity=".22"/><stop offset="1" stop-color="#8a75dd" stop-opacity="0"/></radialGradient>
+ <clipPath id="clip"><rect width="1280" height="340" rx="24"/></clipPath>
+</defs>
+<g clip-path="url(#clip)">
+ <rect width="1280" height="340" fill="url(#bg)"/>
+ <circle cx="1030" cy="155" r="340" fill="url(#halo)"/>
+ <g fill="none" stroke="url(#wave)" stroke-width="1.4" opacity=".15">
+  <ellipse cx="1040" cy="170" rx="275" ry="110" transform="rotate(-23 1040 170)"/>
+  <ellipse cx="1040" cy="170" rx="235" ry="125" transform="rotate(23 1040 170)"/>
+ </g>
+ <g fill="none" stroke="url(#wave)" stroke-linecap="round">
+  <path d="M740 170C800 170 800 112 860 112S920 228 980 228 1040 112 1100 112 1160 170 1220 170" stroke-width="4" opacity=".9"/>
+  <path d="M740 170C800 170 800 142 860 142S920 198 980 198 1040 142 1100 142 1160 170 1220 170" stroke-width="2" opacity=".5"/>
+  <path d="M740 170C800 170 800 194 860 194S920 146 980 146 1040 194 1100 194 1160 170 1220 170" stroke-width="2" opacity=".45"/>
+ </g>
+ <circle cx="980" cy="170" r="33" fill="#242c4d" stroke="#8d98e7" stroke-opacity=".45"/>
+ <path d="M980 182l-13-12c-11-11 4-24 13-12 9-12 24 1 13 12Z" fill="none" stroke="#c4bdff" stroke-width="2.6" stroke-linejoin="round"/>
+ <g font-family="Segoe UI, Arial, sans-serif">
+  <text x="64" y="68" font-size="13" font-weight="600" letter-spacing="3" fill="#aeb9df">SMART-DATING</text>
+  <text x="60" y="152" font-size="76" font-weight="700" letter-spacing="-3" fill="#f1f3fa">nexus</text>
+  <text x="64" y="210" font-size="32" font-weight="600" fill="#dce3ff">Знакомства на одной волне.</text>
+  <text x="64" y="279" font-size="17" fill="#aab8d7">Общие интересы</text>
+  <circle cx="240" cy="273" r="2" fill="#8e9ac8"/>
+  <text x="258" y="279" font-size="17" fill="#aab8d7">Личные истории</text>
+  <circle cx="423" cy="273" r="2" fill="#8e9ac8"/>
+  <text x="441" y="279" font-size="17" fill="#aab8d7">Взаимный интерес</text>
+ </g>
+</g>
+</svg>
