@@ -9,7 +9,22 @@
 | BR-03 · контроль раскрытия | UC-03, UC-04, UC-08 | FR-04, FR-10–FR-13, FR-25 | `GalleryService`, `ContextService`, `PhotoUpload`, `DataControls` | API privacy, photo quota, hidden profile; frontend photo/media tests |
 | BR-04 · взаимное общение | UC-05, UC-06 | FR-18, FR-20–FR-22, FR-24 | `NexusService.react/send/readMessages`, `SwipeDeck`, экран чата | Concurrent likes, access boundaries, unread tests; HTTP smoke |
 | BR-05 · понятный следующий шаг | UC-01, UC-02, UC-05, UC-07 | FR-03, FR-19, FR-23, FR-28 | `WelcomeSetup`, `AppNavigation`, `SwipeDeck`, `ChatMenu` | WelcomeSetup, SwipeWaiting, App, ChatMenu, PublicHome tests; ручной путь |
-| BR-06 · управление участием | UC-07–UC-10 | FR-23, FR-25–FR-27 | `BlockService`, `DataExportService`, `ChatPreference` | API block, export, chat controls; ChatControls tests |
+| BR-06 · управление участием | UC-01, UC-07–UC-10 | FR-02, FR-23, FR-25–FR-27 | `BlockService`, `DataExportService`, `ChatPreference` | API block, export, chat controls; ChatControls tests |
+
+## Сквозные технические требования
+
+Нефункциональные требования действуют для нескольких пользовательских сценариев сразу.
+
+| Требования | Область | Способ проверки |
+| --- | --- | --- |
+| NFR-01, NFR-02 | Запуск и сохранность | Инструкции RUNBOOK, сборки CI, повторный запуск с отдельной файловой БД или volume |
+| NFR-03, NFR-04 | Авторизация и доступ | API-сценарии сессий, чужих ресурсов, закрытых историй, фото и выгрузки |
+| NFR-05, NFR-06 | Модель и ограничение ввода | SemanticEncoderTest, валидация рассказов/сообщений, лимиты галереи и декодирование файлов |
+| NFR-07, NFR-08 | Целостность и порядок выдачи | Конкурентные Like, запросы подбора, детерминированные проверки города/сходства/циклов |
+| NFR-09, NFR-10 | Фоновая работа и обратная связь | Проверки таймеров и задержки ожидания; просмотр сетевых запросов видимой/скрытой вкладки |
+| NFR-11, NFR-12 | Доступность управления и качество изменений | Компонентные проверки диалогов/навигации, ручная приёмка и статус конкретного CI-запуска |
+
+Сценарии без автоматизации выполняются вручную по [TESTING](../TESTING.md); сама строка матрицы не означает успешного выполнения проверки.
 
 ## Где находятся проверки
 

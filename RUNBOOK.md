@@ -12,13 +12,13 @@ git clone https://github.com/SMART-DATING/nexus-frontend.git
 git clone https://github.com/SMART-DATING/nexus-docs.git
 ```
 
-Используется `main`. Для работы из исходников нужны **JDK 21**, **Node.js 22.13+** и npm; Maven скачивает Wrapper. Для Compose достаточно Docker с Compose v2 и Linux containers. Первый запуск требует сети для зависимостей, образов и модели. После загрузки модель обрабатывает рассказы локально, без внешнего API и ключа.
+Используется `main`. Для работы из исходников нужны Git, **JDK 21**, **Node.js 22.20+ из ветки 22 либо 24.12+ из ветки 24** и npm; Maven скачивает Wrapper. На Windows инструкции используют **PowerShell 7** (`pwsh`). На Linux нужны `curl` и `sha256sum` для загрузки и проверки модели. Для Compose достаточно Docker с Compose v2 и Linux containers. Первый запуск требует сети для зависимостей, образов и модели. После загрузки модель обрабатывает рассказы локально, без внешнего API и ключа.
 
 ## 2. Разработка без Docker
 
 ### Backend — первое окно
 
-Windows PowerShell, из `nexus-backend`:
+Windows, PowerShell 7, из `nexus-backend`:
 
 ```powershell
 pwsh -File scripts/download-model.ps1
@@ -26,7 +26,7 @@ pwsh -File scripts/download-model.ps1
 java -jar target/nexus-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
 ```
 
-Linux/macOS, из того же каталога:
+Linux, из того же каталога:
 
 ```sh
 sh scripts/download-model.sh
@@ -75,7 +75,7 @@ docker compose down
 pwsh -File build-demo.ps1
 ```
 
-Либо Linux/macOS:
+Либо Linux:
 
 ```sh
 sh build-demo.sh

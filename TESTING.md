@@ -15,7 +15,7 @@
 
 ### Frontend
 
-Из `nexus-frontend`:
+Из `nexus-frontend`, с Node.js 22.20+ из ветки 22 либо 24.12+ из ветки 24:
 
 ```sh
 npm ci
@@ -27,14 +27,14 @@ npm run build
 
 ### Backend и модель
 
-Из `nexus-backend`, Windows:
+Из `nexus-backend`, Windows с PowerShell 7:
 
 ```powershell
 pwsh -File scripts/download-model.ps1
 .\mvnw.cmd verify
 ```
 
-Linux/macOS:
+Linux:
 
 ```sh
 sh scripts/download-model.sh
